@@ -1,7 +1,6 @@
 // For this project, you will remove hidden surfaces using the zbuffer algorithm.
 // You will also add the ability to interpolate colors within a triangle.
 
-#define NORMALS
 #include <iostream>
 #include <vtkDataSet.h>
 #include <vtkImageData.h>
@@ -16,6 +15,7 @@
 #include <vtkDoubleArray.h>
 #include <math.h>
 
+#define NORMALS
 using std::cerr;
 using std::endl;
 
@@ -288,6 +288,7 @@ class Triangle
       // int vertexId = 0
       // int x = 0, y = 1, z = 2
       // normals[vertexId][y] = ...; 
+      double         shading[3];
               
       bool           isGoingDown;  
       bool           isGoingUp;
@@ -586,6 +587,10 @@ int getArrayIndexOfMinValue(double x1, double x2, int index1, int index2){
     return index2;
 }
 
+double CalculateShading(){
+    return 0.5;
+}
+
 void FormNewTriangle(Triangle t, Triangle* new_t){
     int topIndex = getMaxYIndexOfTriangle(t);
     int bottomIndex = getMinYIndexOfTriangle(t);
@@ -621,6 +626,12 @@ void FormNewTriangle(Triangle t, Triangle* new_t){
     int rightFlatIndex = 1;
     int leftFlatIndex = 2; 
 
+    // PROJECT1F - fake shading... 0.5 for each vertex
+    new_t->shading[0] = CalculateShading();
+    new_t->shading[1] = CalculateShading();
+    new_t->shading[2] = CalculateShading();
+  
+    
     if(t.X[middleIndex] > newXvalue){
         // middleIndex represents the right flat side of new triangle
         new_t->X[rightFlatIndex] = t.X[middleIndex];
@@ -823,6 +834,9 @@ void SaveImage(vtkImageData* image, int frameNumber){
    WriteImage(image,(const char*)filename); 
 }
 
+double CalculatePhongShading(LightingParameters &, double *viewDirection, double *normal){
+    return 0.5;
+}
 int main(){
    Screen screen;
    AllocateScreen(&screen);
