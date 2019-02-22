@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <vtkDataSet.h>
 #include <vtkImageData.h>
@@ -923,7 +922,7 @@ int main(){
    Screen screen;
    AllocateScreen(&screen);
 
-   for(int i =0; i < 1000; i++){
+   for(int i =0; i < 1; i++){
        std::vector<Triangle> triangles = GetTriangles();
        InitializeScreen(&screen); 
        Camera c = GetCamera(i, 1000);
