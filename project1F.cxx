@@ -545,8 +545,6 @@ void RasterizeTriangle(Triangle t, Screen screen){
       double leftEndShading = Interpolate(t.Y[leftFlatIndex],t.Y[downOrUp],t.shading[leftFlatIndex],t.shading[downOrUp],r);
       double rightEndShading = Interpolate(t.Y[rightFlatIndex],t.Y[downOrUp],t.shading[rightFlatIndex],t.shading[downOrUp],r);
 
-      //printf("Working on row %d\n",r);
-      //printf("Left shading = %f, right shading = %f\n",leftEndShading,rightEndShading);
       double leftEndColorRed = Interpolate(t.Y[leftFlatIndex],t.Y[downOrUp],t.colors[leftFlatIndex][0],t.colors[downOrUp][0], r);
       double leftEndColorGreen = Interpolate(t.Y[leftFlatIndex],t.Y[downOrUp],t.colors[leftFlatIndex][1],t.colors[downOrUp][1], r);
       double leftEndColorBlue = Interpolate(t.Y[leftFlatIndex],t.Y[downOrUp],t.colors[leftFlatIndex][2],t.colors[downOrUp][2], r);
@@ -564,9 +562,6 @@ void RasterizeTriangle(Triangle t, Screen screen){
       for(int c = ceil_441(leftEnd); c <= rightEndIndex; c++){
      
          double shading = Interpolate(leftEnd,rightEnd,leftEndShading,rightEndShading, c);
-         if(r == 59 && c ==354){
-             printf("for pixel R=%d C=%d, shading is %f\n",r,c,shading);
-         }
          double r_c_ColorRed = Interpolate(leftEnd,rightEnd,leftEndColorRed,rightEndColorRed, c);
          double r_c_ColorGreen = Interpolate(leftEnd,rightEnd,leftEndColorGreen,rightEndColorGreen, c);
          double r_c_ColorBlue = Interpolate(leftEnd,rightEnd,leftEndColorBlue,rightEndColorBlue, c);
@@ -632,7 +627,6 @@ double CalculatePhongShading(LightingParameters &LightingParameters, double *vie
     Lnormalized[1] = L[1]/Lnormal;
     Lnormalized[2] = L[2]/Lnormal;
     
-    //printf("Lighting Params Normalized: %f, %f, %f\n",Lnormalized[0],Lnormalized[1],Lnormalized[2]); 
 
     double Nnormal = sqrt((normal[0]*normal[0]) + (normal[1]*normal[1]) + (normal[2]*normal[2]));
 
@@ -643,12 +637,7 @@ double CalculatePhongShading(LightingParameters &LightingParameters, double *vie
     double LdotCrossN = L[0]*normal[0] + L[1]*normal[1] + L[2]*normal[2];
     
     double diffuse = fabs(LnormalizeddotcrossN);
-    double diffuse2 = fabs(LnormalizeddotcrossN2);
-    double diffuse3 = fabs(LdotCrossN);
 
-    //printf("DIFF = %f\n",diffuse);
-    //printf("DIFF2 = %f\n",diffuse2);
-    //printf("DIFF3 = %f\n",diffuse3);
 
     double R[3];
     R[0] = 2*(LnormalizeddotcrossN)* normal[0] - Lnormalized[0];
@@ -905,7 +894,6 @@ void TransformTrianglesToDeviceSpace(std::vector<Triangle>* triangles, Camera c)
 }
 void RenderTriangles(std::vector<Triangle> triangles,Screen screen){
     for(int i = 0; i < triangles.size(); i++){
-    //for(int i = 124115; i < 124116; i++){
        Triangle &t = triangles[i]; 
        IdentifyTriangle(&t,screen);
        RasterizeTriangle(t,screen);
@@ -914,19 +902,12 @@ void RenderTriangles(std::vector<Triangle> triangles,Screen screen){
 
 void SaveImage(vtkImageData* image, int frameNumber){
    char filename[50];
-   if(frameNumber == 0){
-       sprintf(filename,"frame00%d",frameNumber);
-   }
-   else{
-       sprintf(filename,"frame%d",frameNumber);
-   }
+   sprintf(filename,"frame%03d",frameNumber);
    WriteImage(image,(const char*)filename); 
 }
 
 void CalculateViewDirectionForEachTriangleVertex(std::vector<Triangle>* triangles, Camera c){
     for(int i = 0; i < triangles->size(); i++){
-    //for(int i = 124115; i < 124116; i++){
-       //printf("Working on triangle %d\n",i);
        Triangle  &t = (*triangles)[i];
        for(int j = 0; j < 3; j++){
           t.viewDirection[j][0] = c.position[0] - t.X[j]; 
@@ -934,14 +915,7 @@ void CalculateViewDirectionForEachTriangleVertex(std::vector<Triangle>* triangle
           t.viewDirection[j][2] = c.position[2] - t.Z[j]; 
 
           t.shading[j] = CalculatePhongShading(lp, t.viewDirection[j],t.normals[j]);
-          if(i < 3){
-              printf("Working on vertex %f, %f, %f\n",t.X[j],t.Y[j],t.Z[j]);
-             printf("Normal is %f, %f, %f\n",t.normals[j][0],t.normals[j][1],t.normals[j][2]);
-             printf("Shading is %f\n",t.shading[j]);
-             printf("\n");
-          }
        }
-       //printf("\n");
     }
 }
 
@@ -949,11 +923,13 @@ int main(){
    Screen screen;
    AllocateScreen(&screen);
 
-   std::vector<Triangle> triangles = GetTriangles();
-   InitializeScreen(&screen); 
-   Camera c = GetCamera(0, 1000);
-   CalculateViewDirectionForEachTriangleVertex(&triangles,c);
-   TransformTrianglesToDeviceSpace(&triangles,c); 
-   RenderTriangles(triangles,screen);
-   SaveImage(screen.image,0);
+   for(int i =0; i < 1000; i++){
+       std::vector<Triangle> triangles = GetTriangles();
+       InitializeScreen(&screen); 
+       Camera c = GetCamera(i, 1000);
+       CalculateViewDirectionForEachTriangleVertex(&triangles,c);
+       TransformTrianglesToDeviceSpace(&triangles,c); 
+       RenderTriangles(triangles,screen);
+       SaveImage(screen.image,i);
+   }
 }
